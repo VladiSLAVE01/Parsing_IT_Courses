@@ -8,7 +8,7 @@
 {% block content %}
     <h1>Список курсов</h1>
 
-    <!-- Статистика и фильтры -->
+    <!-- Фильтры -->
     <div class="row mb-4">
         <div class="col-md-8">
             <div class="btn-group" role="group">
@@ -21,11 +21,17 @@
                 <a href="?source=stepik" class="btn btn-outline-success {% if current_source == 'stepik' %}active{% endif %}">
                     Stepik ({{ stats.stepik }})
                 </a>
+                <a href="?source=with_links" class="btn btn-outline-warning {% if current_source == 'with_links' %}active{% endif %}">
+                    Со ссылками ({{ stats.with_links }})
+                </a>
             </div>
         </div>
         <div class="col-md-4 text-end">
-            <a href="{% url 'parse_dashboard' %}" class="btn btn-warning">
-                Обновить курсы
+            <a href="{% url 'parse_dashboard' %}" class="btn btn-warning me-2">
+                <i class="fas fa-sync-alt"></i> Обновить курсы
+            </a>
+            <a href="{% url 'create_courses' %}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Добавить курс
             </a>
         </div>
     </div>
@@ -37,11 +43,22 @@
                 <div class="col-md-6 mb-4">
                     <div class="card h-100">
                         {% if course.image_url %}
-                            <img src="{{ course.image_url }}" class="card-img-top" alt="{{ course.title }}" style="height: 200px; object-fit: cover;">
+                            <img src="{{ course.image_url }}" class="card-img-top" alt="{{ course.title }}"
+                                 style="height: 200px; object-fit: cover;">
                         {% endif %}
                         <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <h5 class="card-title">{{ course.title }}</h5>
+                            <!-- ЗАГОЛОВОК С ССЫЛКОЙ -->
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">
+                                    {% if course.url %}
+                                    <a href="{{ course.url }}" target="_blank" class="text-decoration-none"
+                                       title="Перейти к курсу на {{ course.get_source_display }}">
+                                        {{ course.title }}
+                                    </a>
+                                    {% else %}
+                                    {{ course.title }}
+                                    {% endif %}
+                                </h5>
                                 <span class="badge {% if course.source == 'hexlet' %}bg-primary{% else %}bg-success{% endif %}">
                                     {{ course.get_source_display }}
                                 </span>
@@ -51,7 +68,11 @@
 
                             <div class="mt-3">
                                 {% if course.price %}
-                                    <p class="mb-1"><strong>Цена:</strong> {{ course.price }}</p>
+                                    <p class="mb-1"><strong>Цена:</strong>
+                                        <span class="badge {% if 'бесплатно' in course.price.lower %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ course.price }}
+                                        </span>
+                                    </p>
                                 {% endif %}
 
                                 {% if course.source == 'stepik' %}
@@ -61,16 +82,34 @@
                                     {% if course.rating %}
                                         <p class="mb-1"><strong>Рейтинг:</strong> {{ course.rating }}/5</p>
                                     {% endif %}
-                                    {% if course.time_to_complete %}
-                                        <p class="mb-1"><strong>Длительность:</strong> {{ course.time_to_complete }} мин.</p>
-                                    {% endif %}
                                 {% endif %}
                             </div>
+
+                            <!-- КНОПКА ССЫЛКИ -->
+                            {% if course.url %}
+                            <div class="mt-3">
+                                <a href="{{ course.url }}" target="_blank"
+                                   class="btn btn-outline-primary w-100"
+                                   rel="noopener noreferrer">
+                                    <i class="fas fa-external-link-alt me-2"></i>
+                                    Перейти к курсу
+                                </a>
+                            </div>
+                            {% endif %}
                         </div>
-                        <div class="card-footer">
+                        <div class="card-footer d-flex justify-content-between align-items-center">
                             <small class="text-muted">
-                                Добавлено {{ course.created_at|date:"d.m.Y" }}
+                                <i class="fas fa-calendar"></i>
+                                {{ course.created_at|date:"d.m.Y" }}
                             </small>
+                            {% if course.url %}
+                            <small>
+                                <a href="{{ course.url }}" target="_blank" class="text-muted"
+                                   title="Открыть ссылку">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </small>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -81,4 +120,38 @@
             <p>Нет курсов. <a href="{% url 'parse_dashboard' %}">Загрузить курсы?</a></p>
         </div>
     {% endif %}
+
+    <!-- Информация о ссылках -->
+    {% if stats.with_links > 0 %}
+    <div class="alert alert-success mt-4">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-link fa-2x me-3"></i>
+            <div>
+                <h5 class="alert-heading mb-1">Ссылки на курсы доступны!</h5>
+                <p class="mb-0">Найдено <strong>{{ stats.with_links }}</strong> курсов с активными ссылками.
+                Нажмите на заголовок курса или кнопку "Перейти к курсу" для перехода на сайт курса.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    transition: transform 0.2s;
+    border: 1px solid #e0e0e0;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+.card-title a {
+    color: #333;
+}
+.card-title a:hover {
+    color: #0066cc;
+    text-decoration: underline;
+}
+</style>
 {% endblock %}

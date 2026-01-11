@@ -1,37 +1,64 @@
 # main/services/parser_service.py
 from django.db import transaction
 from ..models import Task
-from ..parsers.hexlet_parser import HexletParser
-from ..parsers.stepik_adapter import StepikAdapter
-from ..parsers.parse_stepik import Command
+
 
 class ParserService:
     @staticmethod
     def parse_hexlet():
-        """Парсинг Hexlet"""
-        # Импортируем тут, чтобы избежать циклических импортов
+        """Парсинг Hexlet с сохранением ссылок"""
         from ..parsers.hexlet_parser import HexletParser
 
         parser = HexletParser()
         courses = parser.parse()
 
         if not courses:
+            print("DEBUG: Парсер вернул пустой список")
             return 0
 
+        saved_count = 0
+        links_count = 0
+        print(f"DEBUG: Получено {len(courses)} курсов от парсера")
+
         with transaction.atomic():
-            for course_data in courses:
-                Task.objects.update_or_create(
+            for i, course_data in enumerate(courses):
+                print(f"\nDEBUG: Обработка курса {i + 1}: {course_data['title'][:50]}...")
+                print(f"DEBUG: URL курса: {course_data.get('url', 'НЕТ ССЫЛКИ')}")
+
+                # Используем get_or_create вместо ручной проверки
+                task, created = Task.objects.get_or_create(
                     title=course_data['title'],
                     source='hexlet',
-                    defaults=course_data
+                    defaults={
+                        'description': course_data.get('description', ''),
+                        'url': course_data.get('url', ''),  # ← Сохраняем ссылку
+                        'price': course_data.get('price', ''),
+                        'image_url': course_data.get('image_url', ''),
+                        'start_end': course_data.get('start_end', ''),
+                        'is_paid': course_data.get('is_paid', False),
+                        'language': course_data.get('language', 'ru'),
+                    }
                 )
 
-        return len(courses)
+                if created:
+                    saved_count += 1
+                    if course_data.get('url'):
+                        links_count += 1
+                        print(f"DEBUG: СОЗДАН новый курс со ссылкой")
+                else:
+                    # Если курс уже существовал, но не было ссылки - обновляем
+                    if not task.url and course_data.get('url'):
+                        task.url = course_data['url']
+                        task.save()
+                        links_count += 1
+                        print(f"DEBUG: ОБНОВЛЕН существующий курс: добавлена ссылка")
+
+        print(f"\nDEBUG: ИТОГО: Добавлено новых курсов: {saved_count}, Получено ссылок: {links_count}")
+        return saved_count
 
     @staticmethod
     def parse_stepik():
-        """Парсинг Stepik (синхронная обертка)"""
-        # Импортируем тут
+        """Парсинг Stepik"""
         from ..parsers.stepik_adapter import StepikAdapter
 
         courses = StepikAdapter.run_sync()
@@ -39,83 +66,24 @@ class ParserService:
         if not courses:
             return 0
 
-        with transaction.atomic():
-            for course_data in courses:
-                Task.objects.update_or_create(
-                    title=course_data['title'],
-                    source='stepik',
-                    defaults=course_data
-                )
+        saved_count = 0
+        for course_data in courses:
+            task, created = Task.objects.get_or_create(
+                title=course_data['title'],
+                source='stepik',
+                defaults=course_data
+            )
+            if created:
+                saved_count += 1
 
-        return len(courses)
+        return saved_count
 
     @staticmethod
     def parse_all():
         """Запуск всех парсеров"""
         results = {
-            'hexlet': 0,
-            'stepik': 0,
-            'total': 0
+            'hexlet': ParserService.parse_hexlet(),
+            'stepik': ParserService.parse_stepik(),
         }
-
-        try:
-            results['hexlet'] = ParserService.parse_hexlet()
-        except Exception as e:
-            print(f"Ошибка парсинга Hexlet: {e}")
-
-        try:
-            results['stepik'] = ParserService.parse_stepik()
-        except Exception as e:
-            print(f"Ошибка парсинга Stepik: {e}")
-
         results['total'] = results['hexlet'] + results['stepik']
         return results
-
-    def __init__(self):
-        self.hexlet_parser = HexletParser()
-        self.stepik_adapter = StepikAdapter()
-
-    def parse_data(self, source, data):
-        print(f"Parsing data from {source}...")
-
-        if source == 'hexlet':
-            result = self.hexlet_parser.parse(data)
-            print(f"Hexlet parsed {len(result) if isinstance(result, list) else 1} items")
-            return result
-
-        elif source == 'stepik':
-            print(f"Stepik data type: {type(data)}, length: {len(data) if hasattr(data, '__len__') else 'N/A'}")
-
-            # Способ 1: через адаптер
-            result = self.stepik_adapter.parse(data)
-
-            # Способ 2: через функцию (раскомментировать если нужно)
-            # result = parse_stepik_data(data)
-
-            print(f"Stepik parsed {len(result) if isinstance(result, list) else 1} items")
-            return result
-
-        else:
-            raise ValueError(f"Unknown source: {source}")
-
-
-    def get_hexlet_courses_with_links(self):
-        """
-        Возвращает курсы Hexlet с HTML ссылками
-        """
-        hexlet_parser = HexletParser()
-        courses = hexlet_parser.parse()
-
-        # Добавляем HTML ссылки к каждому курсу
-        for course in courses:
-            course['html_link'] = f'<a href="{course["url"]}" target="_blank">{course["title"]}</a>'
-
-        return courses
-
-
-    def get_hexlet_html_block(self):
-        """
-        Возвращает готовый HTML блок с курсами Hexlet
-        """
-        hexlet_parser = HexletParser()
-        return hexlet_parser.generate_html_block()

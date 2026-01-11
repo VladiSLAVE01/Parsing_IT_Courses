@@ -6,21 +6,102 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Создать новый курс</h1>
-    <form method="post">
-        {% csrf_token %}
-        
-        <div class="form-group mb-3">
-            <label for="{{ form.title.id_for_label }}">Название курса</label>
-            {{ form.title }}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Добавить курс вручную</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- Название курса -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Название курса *</label>
+                            <input type="text" class="form-control" id="title" name="title"
+                                   required placeholder="Введите название курса">
+                        </div>
+
+                        <!-- Описание -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Описание</label>
+                            <textarea class="form-control" id="description" name="description"
+                                      rows="3" placeholder="Описание курса"></textarea>
+                        </div>
+
+                        <!-- Ссылка на курс -->
+                        <div class="mb-3">
+                            <label for="url" class="form-label">Ссылка на курс</label>
+                            <input type="url" class="form-control" id="url" name="url"
+                                   placeholder="https://example.com/course">
+                            <div class="form-text">Ссылка должна начинаться с http:// или https://</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <!-- Источник -->
+                                <div class="mb-3">
+                                    <label for="source" class="form-label">Источник</label>
+                                    <select class="form-select" id="source" name="source">
+                                        <option value="hexlet">Hexlet</option>
+                                        <option value="stepik">Stepik</option>
+                                        <option value="manual" selected>Вручную добавлен</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <!-- Цена -->
+                                <div class="mb-3">
+                                    <label for="price" class="form-label">Цена</label>
+                                    <input type="text" class="form-control" id="price" name="price"
+                                           placeholder="Например: Бесплатно или 2990 руб.">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ссылка на изображение -->
+                        <div class="mb-3">
+                            <label for="image_url" class="form-label">Ссылка на изображение</label>
+                            <input type="url" class="form-control" id="image_url" name="image_url"
+                                   placeholder="https://example.com/image.jpg">
+                        </div>
+
+                        <!-- Сообщения об ошибках -->
+                        {% if messages %}
+                        <div class="mb-3">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Кнопки -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'courses' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Назад к курсам
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Сохранить курс
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Подсказка -->
+            <div class="alert alert-info mt-3">
+                <h5><i class="fas fa-lightbulb"></i> Подсказка:</h5>
+                <ul class="mb-0">
+                    <li>Поле "Название курса" обязательно для заполнения</li>
+                    <li>Для массового добавления используйте <a href="{% url 'parse_dashboard' %}">парсинг</a></li>
+                    <li>После сохранения курс появится в общем списке</li>
+                </ul>
+            </div>
         </div>
-        
-        <div class="form-group mb-3">
-            <label for="{{ form.description.id_for_label }}">Описание</label>
-            {{ form.description }}
-        </div>
-        
-        <button type="submit" class="btn btn-success">Добавить курс</button>
-        <span>{{ error }}</span>
-    </form>
+    </div>
+</div>
 {% endblock %}

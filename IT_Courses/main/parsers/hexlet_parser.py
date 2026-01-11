@@ -30,7 +30,7 @@ class HexletParser:
                     money = i.find("p", style="font-size:var(--mantine-font-size-xl)").text
                     image = i.find("img", class_="m_9e117634 mantine-Image-root mantine-visible-from-xs")["src"]
 
-                    link_element = i.find("a", href=True)
+                    link_element = i.find("a",href=True)
                     if link_element:
                         href = link_element.get("href")
                         # Создаем полный URL
