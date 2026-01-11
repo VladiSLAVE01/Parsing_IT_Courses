@@ -1,0 +1,12 @@
+# Основное
+Django==4.2.10
+asgiref==3.7.2
+sqlparse==0.4.4
+
+# Парсинг
+beautifulsoup4==4.12.2
+requests==2.31.0
+
+# Для Stepik парсера
+aiohttp==3.9.1
+fake-useragent==1.4.0
