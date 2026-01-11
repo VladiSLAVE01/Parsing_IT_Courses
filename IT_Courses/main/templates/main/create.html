@@ -1,16 +1,26 @@
+<!-- templates/main/create.html -->
 {% extends 'main/base.html' %}
 
 {% block title %}
-Создать таск
+Создание курса
 {% endblock %}
 
 {% block content %}
-    <h1>Создать таск</h1>
+    <h1>Создать новый курс</h1>
     <form method="post">
         {% csrf_token %}
-        {{ form.title }}<br>
-        {{ form.task }}<br>
-        <button type="submit" class="btn btn-success">Добавить</button>
+        
+        <div class="form-group mb-3">
+            <label for="{{ form.title.id_for_label }}">Название курса</label>
+            {{ form.title }}
+        </div>
+        
+        <div class="form-group mb-3">
+            <label for="{{ form.description.id_for_label }}">Описание</label>
+            {{ form.description }}
+        </div>
+        
+        <button type="submit" class="btn btn-success">Добавить курс</button>
         <span>{{ error }}</span>
     </form>
 {% endblock %}

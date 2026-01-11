@@ -17,19 +17,26 @@
                 </path>
             </svg>
             <span class="fs-4">
-                <ya-tr-span data-index="1-0" data-translated="false" data-source-lang="en" data-target-lang="ru" data-value="Pricing example" data-translation="Пример ценообразования" data-ch="0" data-type="trSpan" data-selected="false" style="visibility: inherit !important;">Главная</ya-tr-span>
+                Главная
             </span>
         </a>
+
+        <!-- НАВИГАЦИЯ - ВСЕ ССЫЛКИ ВНУТРИ НАВ -->
         <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
             <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="{% url 'courses' %}">
-                <ya-tr-span data-index="2-0" data-translated="false" data-source-lang="en" data-target-lang="ru" data-value="Support" data-translation="Поддержка" data-ch="0" data-type="trSpan" data-selected="false" style="visibility: inherit !important;">Courses</ya-tr-span>
+                Курсы
             </a>
-        </nav>
-        <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="{% url 'create' %}">Создать таск</a>
-        <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="{% url 'parse' %}">Парсить курсы</a>
+            <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="{% url 'create' %}">
+                Создать таск
+            </a>
+            <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="{% url 'parse_dashboard' %}">
+                Парсить курсы
+            </a>
+        </nav> <!-- ЗАКРЫВАЮЩИЙ ТЕГ ДЛЯ NAV -->
     </div>
+
     <div class="container">
-            {% block content %}{% endblock %}
+        {% block content %}{% endblock %}
     </div>
 </body>
 </html>

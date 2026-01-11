@@ -1,0 +1,96 @@
+
+{% extends 'main/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Парсинг курсов</h2>
+
+    <!-- Статистика -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Всего курсов</h5>
+                    <h2>{{ stats.total }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-info">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Hexlet</h5>
+                    <h2>{{ stats.hexlet }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Stepik</h5>
+                    <h2>{{ stats.stepik }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Парсеры -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Hexlet.io</h5>
+                    <p class="card-text">Парсинг курсов программирования с Hexlet</p>
+                    <a href="{% url 'parse_hexlet' %}" class="btn btn-primary">
+                        Запустить парсер Hexlet
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Stepik.org</h5>
+                    <p class="card-text">Парсинг IT курсов с платформы Stepik</p>
+                    <a href="{% url 'parse_stepik' %}" class="btn btn-success">
+                        Запустить парсер Stepik
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка всех парсеров -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Запустить все парсеры</h5>
+                    <p class="card-text">Будет выполнено: Hexlet + Stepik</p>
+                    <a href="{% url 'parse_all' %}" class="btn btn-warning btn-lg">
+                        Запустить ВСЕ парсеры
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Сообщения -->
+    {% if messages %}
+    <div class="mt-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Навигация -->
+    <div class="mt-4">
+        <a href="{% url 'courses' %}" class="btn btn-secondary">
+            ← Вернуться к списку курсов
+        </a>
+    </div>
+</div>
+{% endblock %}
